@@ -88,15 +88,13 @@ export function ExerciseSelection({
     }, 300),
     []
   )
-
-  const handleExerciseSelect = (exercise: Exercise) => {
-    setCustomExercise(prev => ({
-      ...prev,
-      name: exercise.name,
-      muscleGroup: exercise.muscle
-    }))
-    setIsPopoverOpen(false)
-  }
+ useEffect(() => {
+    if (customExercise.name.length >= 2) {
+      searchExercises(customExercise.name)
+    } else {
+      setSearchResults([])
+    }
+  }, [customExercise.name, searchExercises])
 
   const addCustomExercise = () => {
     if (customExercise.name && customExercise.sets && customExercise.reps) {
@@ -113,14 +111,17 @@ export function ExerciseSelection({
     }
   }
 
-  useEffect(() => {
-    if (customExercise.name.length >= 2) {
-      searchExercises(customExercise.name)
-    } else {
-      setSearchResults([])
-    }
-  }, [customExercise.name, searchExercises])
+ 
+  const handleExerciseSelect = (exercise: Exercise) => {
+    setCustomExercise(prev => ({
+      ...prev,
+      name: exercise.name,
+      muscleGroup: exercise.muscle
+    }))
+    setIsPopoverOpen(false)
+  }
 
+  
   return (
     <div className="space-y-4">
       <Card>
