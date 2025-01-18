@@ -10,14 +10,25 @@ import { Button } from "@/components/ui/button"
 export default function WorkoutEntry() {
   const { addWorkout } = useWorkout()
   const [date, setDate] = useState<Date>(new Date())
-  const [exercises, setExercises] = useState([])
+  const [exercises, setExercises] = useState<Array<{
+    name: string;
+    muscleGroup: string;
+    sets: number;
+    reps: number;
+  }>>([])
 
   const handleSave = () => {
+    if (exercises.length === 0) {
+      alert("Please add at least one exercise before saving the workout.")
+      return
+    }
     const workout = {
       date: date.toISOString().split("T")[0],
       exercises,
     }
     addWorkout(workout)
+    setExercises([]) // Reset exercises after saving
+    alert("Workout saved successfully!")
   }
 
   return (

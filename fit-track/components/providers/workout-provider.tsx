@@ -24,16 +24,24 @@ export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => 
   const [workouts, setWorkouts] = useState<Workout[]>([])
 
   useEffect(() => {
-    const storedWorkouts = localStorage.getItem("workouts")
-    if (storedWorkouts) {
-      setWorkouts(JSON.parse(storedWorkouts))
+    try {
+      const storedWorkouts = localStorage.getItem("workouts")
+      if (storedWorkouts) {
+        setWorkouts(JSON.parse(storedWorkouts))
+      }
+    } catch (error) {
+      console.error("Error loading workouts from localStorage:", error)
     }
   }, [])
 
   const addWorkout = (workout: Workout) => {
-    const updatedWorkouts = [...workouts, workout]
-    setWorkouts(updatedWorkouts)
-    localStorage.setItem("workouts", JSON.stringify(updatedWorkouts))
+    try {
+      const updatedWorkouts = [...workouts, workout]
+      setWorkouts(updatedWorkouts)
+      localStorage.setItem("workouts", JSON.stringify(updatedWorkouts))
+    } catch (error) {
+      console.error("Error saving workout to localStorage:", error)
+    }
   }
 
   const getMuscleSummary = () => {

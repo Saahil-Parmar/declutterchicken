@@ -62,7 +62,8 @@
     "@react-navigation/stack": "latest",
     "@react-native-async-storage/async-storage": "latest",
     "react-native": "latest",
-    "@react-native-community/datetimepicker": "latest"
+    "@react-native-community/datetimepicker": "latest",
+    "lodash.debounce": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
