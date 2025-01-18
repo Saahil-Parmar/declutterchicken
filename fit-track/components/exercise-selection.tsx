@@ -27,6 +27,7 @@ const predefinedExercises = [
   { name: "Push-ups", muscleGroup: "Chest" },
   { name: "Squats", muscleGroup: "Legs" },
   { name: "Pull-ups", muscleGroup: "Back" },
+    // Add more predefined exercises
 ]
 
 interface ExerciseSelectionProps {
