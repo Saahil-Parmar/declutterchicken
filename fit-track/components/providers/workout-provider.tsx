@@ -48,10 +48,11 @@ export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => 
     const summary: Record<string, number> = {}
     workouts.forEach((workout) => {
       workout.exercises.forEach((exercise) => {
-        if (summary[exercise.muscleGroup]) {
-          summary[exercise.muscleGroup] += 1
+        const muscleGroup = exercise.muscleGroup || "Unknown"
+        if (summary[muscleGroup]) {
+          summary[muscleGroup] += 1
         } else {
-          summary[exercise.muscleGroup] = 1
+          summary[muscleGroup] = 1
         }
       })
     })
