@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useCallback, useEffect } from "react"
 import { Input } from "@/components/ui/input"
@@ -27,7 +27,7 @@ const predefinedExercises = [
   { name: "Push-ups", muscleGroup: "Chest" },
   { name: "Squats", muscleGroup: "Legs" },
   { name: "Pull-ups", muscleGroup: "Back" },
-    // Add more predefined exercises
+  // Add more predefined exercises
 ]
 
 interface ExerciseSelectionProps {
@@ -89,7 +89,8 @@ export function ExerciseSelection({
     }, 300),
     []
   )
- useEffect(() => {
+
+  useEffect(() => {
     if (customExercise.name.length >= 2) {
       searchExercises(customExercise.name)
     } else {
@@ -97,22 +98,30 @@ export function ExerciseSelection({
     }
   }, [customExercise.name, searchExercises])
 
+  const addExercise = (exercise: Exercise) => {
+    onExercisesChange([
+      ...exercises,
+      {
+        name: exercise.name,
+        muscleGroup: exercise.muscle,
+        sets: parseInt(customExercise.sets) || 0,
+        reps: parseInt(customExercise.reps) || 0,
+      },
+    ])
+  }
+
   const addCustomExercise = () => {
-    if (customExercise.name && customExercise.sets && customExercise.reps) {
-      onExercisesChange([
-        ...exercises,
-        {
-          name: customExercise.name,
-          muscleGroup: customExercise.muscleGroup,
-          sets: parseInt(customExercise.sets) || 0,
-          reps: parseInt(customExercise.reps) || 0,
-        },
-      ])
+    if (
+      customExercise.name &&
+      customExercise.muscleGroup &&
+      customExercise.sets &&
+      customExercise.reps
+    ) {
+      addExercise(customExercise)
       setCustomExercise({ name: "", muscleGroup: "", sets: "", reps: "" })
     }
   }
 
- 
   const handleExerciseSelect = (exercise: Exercise) => {
     setCustomExercise(prev => ({
       ...prev,
@@ -122,7 +131,6 @@ export function ExerciseSelection({
     setIsPopoverOpen(false)
   }
 
-  
   return (
     <div className="space-y-4">
       <Card>
@@ -136,12 +144,7 @@ export function ExerciseSelection({
               key={exercise.name}
               variant="outline"
               className="w-full justify-start"
-              onClick={() => {
-                onExercisesChange([
-                  ...exercises,
-                  { ...exercise, sets: 3, reps: 10 }
-                ])
-              }}
+              onClick={() => addExercise({ ...exercise, sets: "3", reps: "10" })}
             >
               {exercise.name} - {exercise.muscleGroup}
             </Button>
@@ -156,11 +159,11 @@ export function ExerciseSelection({
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="search">Search Exercises</Label>
+            <Label htmlFor="name">Search Exercises</Label>
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Input
-                  id="search"
+                  id="name"
                   value={customExercise.name}
                   onChange={(e) => {
                     const newValue = e.target.value
@@ -177,7 +180,12 @@ export function ExerciseSelection({
               </PopoverTrigger>
               <PopoverContent className="p-0" align="start">
                 <Command>
-                  <CommandInput placeholder="Search exercises..." />
+                  <Input
+                    placeholder="Search exercises..."
+                    onChange={(e) => {
+                      searchExercises(e.target.value);
+                    }}
+                  />
                   <CommandList>
                     <CommandEmpty>
                       {isSearching ? (
@@ -195,7 +203,7 @@ export function ExerciseSelection({
                           key={exercise.name}
                           onSelect={() => handleExerciseSelect(exercise)}
                         >
-                          {exercise.name} - {exercise.muscle}
+                          {exercise.name}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -204,17 +212,24 @@ export function ExerciseSelection({
               </PopoverContent>
             </Popover>
           </div>
-
+          <div className="grid gap-2">
+            <Label htmlFor="exerciseName">Exercise Name</Label>
+            <Input
+              id="exerciseName"
+              value={customExercise.name}
+              readOnly
+              placeholder="Selected exercise name"
+            />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="muscleGroup">Muscle Group</Label>
             <Input
               id="muscleGroup"
               value={customExercise.muscleGroup}
               readOnly
-              placeholder="Will be auto-populated from selection"
+              placeholder="Auto-populated muscle group"
             />
           </div>
-
           <div className="grid gap-2">
             <Label htmlFor="sets">Sets</Label>
             <Input
@@ -222,12 +237,10 @@ export function ExerciseSelection({
               type="number"
               value={customExercise.sets}
               onChange={(e) =>
-                setCustomExercise(prev => ({ ...prev, sets: e.target.value }))
+                setCustomExercise({ ...customExercise, sets: e.target.value })
               }
-              placeholder="Enter number of sets"
             />
           </div>
-
           <div className="grid gap-2">
             <Label htmlFor="reps">Reps</Label>
             <Input
@@ -235,18 +248,11 @@ export function ExerciseSelection({
               type="number"
               value={customExercise.reps}
               onChange={(e) =>
-                setCustomExercise(prev => ({ ...prev, reps: e.target.value }))
+                setCustomExercise({ ...customExercise, reps: e.target.value })
               }
-              placeholder="Enter number of reps"
             />
           </div>
-
-          <Button 
-            onClick={addCustomExercise}
-            disabled={!customExercise.name || !customExercise.sets || !customExercise.reps}
-          >
-            Add Custom Exercise
-          </Button>
+          <Button onClick={addCustomExercise}>Add Custom Exercise</Button>
         </CardContent>
       </Card>
     </div>
