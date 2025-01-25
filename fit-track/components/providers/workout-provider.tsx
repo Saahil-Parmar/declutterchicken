@@ -25,6 +25,17 @@ interface WorkoutContextType {
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined)
 
+export const normalizeMuscleGroup = (muscleGroup: string): string => {
+  const normalized = muscleGroup.toLowerCase()
+  if (normalized === "shoulders") return "Shoulders"
+  if (normalized === "abdominals" || normalized === "abs") return "Abs"
+  // Capitalize the first letter of each word
+  return normalized
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => {
   const [workouts, setWorkouts] = useState<Workout[]>([])
 
@@ -38,13 +49,6 @@ export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => 
       console.error("Error loading workouts from localStorage:", error)
     }
   }, [])
-
-  const normalizeMuscleGroup = (muscleGroup: string): string => {
-    const normalized = muscleGroup.toLowerCase()
-    if (normalized === "shoulders") return "Shoulders"
-    if (normalized === "abdominals" || normalized === "abs") return "Abs"
-    return muscleGroup
-  }
 
   const addWorkout = (workout: Workout) => {
     try {
