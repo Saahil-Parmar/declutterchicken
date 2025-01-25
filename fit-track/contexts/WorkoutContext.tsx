@@ -71,7 +71,7 @@ export const WorkoutProvider: React.FC<{ children: React.ReactNode }> = ({ child
 export const useWorkout = () => {
   const context = useContext(WorkoutContext);
   if (context === undefined) {
-    throw new Error('useWorkout must be used within a WorkoutProvider');
+    throw new Error('useWorkout must be used within WorkoutProvider');
   }
   return context;
 };
