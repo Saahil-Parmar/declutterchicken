@@ -1,6 +1,7 @@
 "use client"
 
 import { useWorkout } from "./providers/workout-provider"
+import { normalizeMuscleGroup } from "./providers/workout-provider"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -49,7 +50,7 @@ export default function Analytics() {
             <TableBody>
               {Object.entries(muscleSummary).map(([muscle, { sets, lastWorkoutDate }]) => (
                 <TableRow key={muscle}>
-                  <TableCell>{muscle}</TableCell>
+                  <TableCell>{normalizeMuscleGroup(muscle)}</TableCell>
                   <TableCell className="text-right">{sets}</TableCell>
                   <TableCell className="text-right">{new Date(lastWorkoutDate).toLocaleDateString()}</TableCell>
                 </TableRow>
