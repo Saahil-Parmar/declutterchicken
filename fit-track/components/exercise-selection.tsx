@@ -30,6 +30,17 @@ interface Exercise {
   instructions: string
 }
 
+const normalizeMuscleGroup = (muscleGroup: string): string => {
+  const normalized = muscleGroup.toLowerCase()
+  if (normalized === "shoulders") return "Shoulders"
+  if (normalized === "abdominals" || normalized === "abs") return "Abs"
+  // Capitalize the first letter of each word
+  return normalized
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 export function ExerciseSelection({ exercises, onExercisesChange }: ExerciseSelectionProps) {
   const [customExercise, setCustomExercise] = useState({
     name: "",
@@ -90,7 +101,7 @@ export function ExerciseSelection({ exercises, onExercisesChange }: ExerciseSele
   const handleExerciseSelect = (exercise: Exercise) => {
     const newExercise = {
       name: exercise.name,
-      muscleGroup: exercise.muscle,
+      muscleGroup: normalizeMuscleGroup(exercise.muscle), // Apply normalization here
       sets: customExercise.sets ? Number(customExercise.sets) : 0,
       reps: customExercise.reps ? Number(customExercise.reps) : 0,
     }
@@ -102,7 +113,7 @@ export function ExerciseSelection({ exercises, onExercisesChange }: ExerciseSele
   const handleAddCustomExercise = () => {
     const newExercise = {
       name: customExercise.name,
-      muscleGroup: customExercise.muscleGroup,
+      muscleGroup: normalizeMuscleGroup(customExercise.muscleGroup), // Apply normalization here
       sets: customExercise.sets ? Number(customExercise.sets) : 0,
       reps: customExercise.reps ? Number(customExercise.reps) : 0,
     }
