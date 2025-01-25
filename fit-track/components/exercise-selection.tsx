@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useCallback, useEffect } from "react"
 import { Input } from "@/components/ui/input"
@@ -180,7 +180,12 @@ export function ExerciseSelection({
               </PopoverTrigger>
               <PopoverContent className="p-0" align="start">
                 <Command>
-                  <CommandInput placeholder="Search exercises..." />
+                  <Input
+                    placeholder="Search exercises..."
+                    onChange={(e) => {
+                      searchExercises(e.target.value);
+                    }}
+                  />
                   <CommandList>
                     <CommandEmpty>
                       {isSearching ? (
