@@ -1,33 +1,19 @@
-"use client";
+"use client"
 
 import { useState, useCallback, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Loader2 } from 'lucide-react'
-import debounce from 'lodash.debounce'
+import { Loader2 } from "lucide-react"
+import debounce from "lodash.debounce"
 
 const predefinedExercises = [
   { name: "Push-ups", muscleGroup: "Chest" },
   { name: "Squats", muscleGroup: "Legs" },
   { name: "Pull-ups", muscleGroup: "Back" },
-  // Add more predefined exercises
 ]
 
 interface ExerciseSelectionProps {
@@ -44,16 +30,22 @@ interface Exercise {
   instructions: string
 }
 
-export function ExerciseSelection({
-  exercises,
-  onExercisesChange,
-}: ExerciseSelectionProps) {
+export function ExerciseSelection({ exercises, onExercisesChange }: ExerciseSelectionProps) {
   const [customExercise, setCustomExercise] = useState({
     name: "",
     muscleGroup: "",
     sets: "",
     reps: "",
   })
+  const [predefinedInputs, setPredefinedInputs] = useState<Record<string, { sets: string; reps: string }>>(
+    predefinedExercises.reduce(
+      (acc, exercise) => ({
+        ...acc,
+        [exercise.name]: { sets: "3", reps: "10" },
+      }),
+      {},
+    ),
+  )
   const [searchResults, setSearchResults] = useState<Exercise[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -67,27 +59,24 @@ export function ExerciseSelection({
 
       setIsSearching(true)
       try {
-        const response = await fetch(
-          `https://api.api-ninjas.com/v1/exercises?name=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              'X-Api-Key': 'rXSXRIqzOy7yXtqRCjCWgQ==yjMwa2JRCa6lGwRK'
-            }
-          }
-        )
+        const response = await fetch(`https://api.api-ninjas.com/v1/exercises?name=${encodeURIComponent(query)}`, {
+          headers: {
+            "X-Api-Key": "rXSXRIqzOy7yXtqRCjCWgQ==yjMwa2JRCa6lGwRK",
+          },
+        })
         if (!response.ok) {
-          throw new Error('API request failed')
+          throw new Error("API request failed")
         }
         const data = await response.json()
         setSearchResults(data)
       } catch (error) {
-        console.error('Error fetching exercises:', error)
+        console.error("Error fetching exercises:", error)
         setSearchResults([])
       } finally {
         setIsSearching(false)
       }
     }, 300),
-    []
+    [],
   )
 
   useEffect(() => {
@@ -98,37 +87,47 @@ export function ExerciseSelection({
     }
   }, [customExercise.name, searchExercises])
 
-  const addExercise = (exercise: Exercise) => {
-    onExercisesChange([
-      ...exercises,
-      {
-        name: exercise.name,
-        muscleGroup: exercise.muscle,
-        sets: parseInt(customExercise.sets) || 0,
-        reps: parseInt(customExercise.reps) || 0,
-      },
-    ])
-  }
-
-  const addCustomExercise = () => {
-    if (
-      customExercise.name &&
-      customExercise.muscleGroup &&
-      customExercise.sets &&
-      customExercise.reps
-    ) {
-      addExercise(customExercise)
-      setCustomExercise({ name: "", muscleGroup: "", sets: "", reps: "" })
-    }
-  }
-
   const handleExerciseSelect = (exercise: Exercise) => {
-    setCustomExercise(prev => ({
-      ...prev,
+    const newExercise = {
       name: exercise.name,
-      muscleGroup: exercise.muscle
-    }))
+      muscleGroup: exercise.muscle,
+      sets: customExercise.sets ? Number(customExercise.sets) : 0,
+      reps: customExercise.reps ? Number(customExercise.reps) : 0,
+    }
+    onExercisesChange([...exercises, newExercise])
+    setCustomExercise({ name: "", muscleGroup: "", sets: "", reps: "" })
     setIsPopoverOpen(false)
+  }
+
+  const handleAddCustomExercise = () => {
+    const newExercise = {
+      name: customExercise.name,
+      muscleGroup: customExercise.muscleGroup,
+      sets: customExercise.sets ? Number(customExercise.sets) : 0,
+      reps: customExercise.reps ? Number(customExercise.reps) : 0,
+    }
+    onExercisesChange([...exercises, newExercise])
+    setCustomExercise({ name: "", muscleGroup: "", sets: "", reps: "" })
+  }
+
+  const handleAddPredefinedExercise = (exercise: { name: string; muscleGroup: string }) => {
+    const inputs = predefinedInputs[exercise.name]
+    const newExercise = {
+      ...exercise,
+      sets: Number(inputs.sets) || 0,
+      reps: Number(inputs.reps) || 0,
+    }
+    onExercisesChange([...exercises, newExercise])
+  }
+
+  const handlePredefinedInputChange = (exerciseName: string, field: "sets" | "reps", value: string) => {
+    setPredefinedInputs((prev) => ({
+      ...prev,
+      [exerciseName]: {
+        ...prev[exerciseName],
+        [field]: value,
+      },
+    }))
   }
 
   return (
@@ -138,16 +137,40 @@ export function ExerciseSelection({
           <CardTitle>Predefined Exercises</CardTitle>
           <CardDescription>Select from common exercises</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-2">
+        <CardContent className="grid gap-4">
           {predefinedExercises.map((exercise) => (
-            <Button
-              key={exercise.name}
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => addExercise({ ...exercise, sets: "3", reps: "10" })}
-            >
-              {exercise.name} - {exercise.muscleGroup}
-            </Button>
+            <div key={exercise.name} className="flex items-center space-x-2">
+              <div className="flex-grow">
+                {exercise.name} - {exercise.muscleGroup}
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="flex flex-col items-center">
+                  <Label htmlFor={`${exercise.name}-sets`} className="mb-1">
+                    SETS
+                  </Label>
+                  <Input
+                    id={`${exercise.name}-sets`}
+                    type="number"
+                    value={predefinedInputs[exercise.name].sets}
+                    onChange={(e) => handlePredefinedInputChange(exercise.name, "sets", e.target.value)}
+                    className="w-16"
+                  />
+                </div>
+                <div className="flex flex-col items-center">
+                  <Label htmlFor={`${exercise.name}-reps`} className="mb-1">
+                    REPS
+                  </Label>
+                  <Input
+                    id={`${exercise.name}-reps`}
+                    type="number"
+                    value={predefinedInputs[exercise.name].reps}
+                    onChange={(e) => handlePredefinedInputChange(exercise.name, "reps", e.target.value)}
+                    className="w-16"
+                  />
+                </div>
+              </div>
+              <Button onClick={() => handleAddPredefinedExercise(exercise)}>Add</Button>
+            </div>
           ))}
         </CardContent>
       </Card>
@@ -167,7 +190,7 @@ export function ExerciseSelection({
                   value={customExercise.name}
                   onChange={(e) => {
                     const newValue = e.target.value
-                    setCustomExercise(prev => ({ ...prev, name: newValue }))
+                    setCustomExercise((prev) => ({ ...prev, name: newValue }))
                     if (newValue.length >= 2) {
                       setIsPopoverOpen(true)
                       searchExercises(newValue)
@@ -183,7 +206,7 @@ export function ExerciseSelection({
                   <Input
                     placeholder="Search exercises..."
                     onChange={(e) => {
-                      searchExercises(e.target.value);
+                      searchExercises(e.target.value)
                     }}
                   />
                   <CommandList>
@@ -194,16 +217,23 @@ export function ExerciseSelection({
                           Searching...
                         </div>
                       ) : (
-                        'No exercises found.'
+                        "No exercises found."
                       )}
                     </CommandEmpty>
                     <CommandGroup>
                       {searchResults.map((exercise) => (
                         <CommandItem
                           key={exercise.name}
-                          onSelect={() => handleExerciseSelect(exercise)}
+                          onSelect={() => {
+                            setCustomExercise((prev) => ({
+                              ...prev,
+                              name: exercise.name,
+                              muscleGroup: exercise.muscle,
+                            }))
+                            setIsPopoverOpen(false)
+                          }}
                         >
-                          {exercise.name}
+                          {exercise.name} - {exercise.muscle}
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -212,47 +242,42 @@ export function ExerciseSelection({
               </PopoverContent>
             </Popover>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="exerciseName">Exercise Name</Label>
-            <Input
-              id="exerciseName"
-              value={customExercise.name}
-              readOnly
-              placeholder="Selected exercise name"
-            />
-          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="muscleGroup">Muscle Group</Label>
             <Input
               id="muscleGroup"
               value={customExercise.muscleGroup}
-              readOnly
-              placeholder="Auto-populated muscle group"
+              onChange={(e) => setCustomExercise((prev) => ({ ...prev, muscleGroup: e.target.value }))}
+              placeholder="Enter muscle group"
             />
           </div>
+
           <div className="grid gap-2">
             <Label htmlFor="sets">Sets</Label>
             <Input
               id="sets"
               type="number"
               value={customExercise.sets}
-              onChange={(e) =>
-                setCustomExercise({ ...customExercise, sets: e.target.value })
-              }
+              onChange={(e) => setCustomExercise((prev) => ({ ...prev, sets: e.target.value }))}
+              placeholder="Enter number of sets"
             />
           </div>
+
           <div className="grid gap-2">
             <Label htmlFor="reps">Reps</Label>
             <Input
               id="reps"
               type="number"
               value={customExercise.reps}
-              onChange={(e) =>
-                setCustomExercise({ ...customExercise, reps: e.target.value })
-              }
+              onChange={(e) => setCustomExercise((prev) => ({ ...prev, reps: e.target.value }))}
+              placeholder="Enter number of reps"
             />
           </div>
-          <Button onClick={addCustomExercise}>Add Custom Exercise</Button>
+
+          <Button onClick={handleAddCustomExercise} className="w-full">
+            Add Custom Exercise
+          </Button>
         </CardContent>
       </Card>
     </div>
