@@ -36,10 +36,11 @@ export const normalizeMuscleGroup = (muscleGroup: string): string => {
     .join(" ")
 }
 
-export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => {
+export const WorkoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [workouts, setWorkouts] = useState<Workout[]>([])
 
   useEffect(() => {
+    console.log("WorkoutProvider mounted")
     try {
       const storedWorkouts = localStorage.getItem("workouts")
       if (storedWorkouts) {
@@ -48,6 +49,7 @@ export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => 
     } catch (error) {
       console.error("Error loading workouts from localStorage:", error)
     }
+    return () => console.log("WorkoutProvider unmounted")
   }, [])
 
   const addWorkout = (workout: Workout) => {
@@ -155,13 +157,15 @@ export const WorkoutProvider = ({ children }: { children: React.ReactNode }) => 
     return Array.from(muscleGroups).filter((muscle) => !workedOutMuscles.has(muscle))
   }
 
-  return (
-    <WorkoutContext.Provider
-      value={{ workouts, addWorkout, getMuscleSummary, getMaxWorkedOutMuscle, getNotWorkedOutMuscles }}
-    >
-      {children}
-    </WorkoutContext.Provider>
-  )
+  const contextValue: WorkoutContextType = {
+    workouts,
+    addWorkout,
+    getMuscleSummary,
+    getMaxWorkedOutMuscle,
+    getNotWorkedOutMuscles,
+  }
+
+  return <WorkoutContext.Provider value={contextValue}>{children}</WorkoutContext.Provider>
 }
 
 export const useWorkout = () => {
@@ -171,4 +175,3 @@ export const useWorkout = () => {
   }
   return context
 }
-
