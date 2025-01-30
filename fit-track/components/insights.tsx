@@ -1,92 +1,69 @@
 "use client"
 
 import { useWorkout } from "./providers/workout-provider"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MusclePhysiologyImage } from "./muscle-physiology-image"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Dumbbell, LineChart, Settings } from "lucide-react"
-
-function getRecommendations(muscleSummary: Record<string, number>): string[] {
-  const recommendations: string[] = []
-  const underworkedMuscles = Object.entries(muscleSummary)
-    .filter(([_, days]) => days > 3)
-    .map(([muscle]) => muscle)
-
-  if (underworkedMuscles.length > 0) {
-    recommendations.push(`Focus on ${underworkedMuscles.join(", ")} as these areas need attention.`)
-  }
-
-  // Add general recommendations
-  recommendations.push(
-    "Increase workout intensity to balance upper and lower body.",
-    "Incorporate more compound exercises to improve overall strength.",
-    "Focus on core exercises to enhance stability.",
-  )
-
-  return recommendations
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Trophy, AlertTriangle } from "lucide-react"
 
 export default function Insights() {
-  const { workouts, getMuscleSummary } = useWorkout()
+  const { getMuscleSummary, getMaxWorkedOutMuscle, getNotWorkedOutMuscles } = useWorkout()
   const muscleSummary = getMuscleSummary()
-
-  const recommendations = getRecommendations(muscleSummary)
+  const maxWorkedOutMuscle = getMaxWorkedOutMuscle()
+  const notWorkedOutMuscles = getNotWorkedOutMuscles()
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Muscle Insights</CardTitle>
-        <CardDescription>Track your muscle activation and get personalized recommendations</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex justify-center">
-          <MusclePhysiologyImage muscleSummary={muscleSummary} />
-        </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Workout Insights</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {maxWorkedOutMuscle && (
+            <Alert>
+              <Trophy className="h-4 w-4" />
+              <AlertTitle>Most Worked Out Muscle This Week</AlertTitle>
+              <AlertDescription>
+                {maxWorkedOutMuscle.muscle} - {maxWorkedOutMuscle.sets} sets
+              </AlertDescription>
+            </Alert>
+          )}
+          {notWorkedOutMuscles.length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Not Worked Out Muscles This Week</AlertTitle>
+              <AlertDescription>{notWorkedOutMuscles.join(", ")}</AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Muscle Activation Levels</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#4CAF50]" />
-              <span>Highly Activated (Last 24 hours)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#8BC34A]" />
-              <span>Recently Activated (1 day ago)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#FFC107]" />
-              <span>Moderately Activated (2-3 days ago)</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#F44336]" />
-              <span>Underworked (>3 days)</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Recommendations</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            {recommendations.map((recommendation, index) => (
-              <Alert key={index}>
-                <AlertDescription>{recommendation}</AlertDescription>
-              </Alert>
-            ))}
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-around pt-4">
-          <Dumbbell className="h-6 w-6 text-muted-foreground" />
-          <LineChart className="h-6 w-6 text-muted-foreground" />
-          <Settings className="h-6 w-6 text-muted-foreground" />
-        </div>
-      </CardContent>
-    </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Workout Analytics</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Muscle Group</TableHead>
+                <TableHead className="text-right">Total Sets</TableHead>
+                <TableHead className="text-right">Last Workout Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(muscleSummary).map(([muscle, { sets, lastWorkoutDate }]) => (
+                <TableRow key={muscle}>
+                  <TableCell>{muscle}</TableCell>
+                  <TableCell className="text-right">{sets}</TableCell>
+                  <TableCell className="text-right">{new Date(lastWorkoutDate).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 
